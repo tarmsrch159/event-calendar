@@ -3,13 +3,15 @@ import { useState, useEffect } from 'react'
 import Header from '../Components/Header'
 import Header_start from '../Components/Header_start'
 import Sidebar from '../Components/Sidebar'
-import axios from 'axios'
+// import axios from 'axios'
+import axios from '../api/axios'
+import { useNavigate } from 'react-router-dom'
 
 function Add_meeting_room({ obtaine_msg }) {
 
     const [room_Id, setRoom_Id] = useState('')
     const [room_Name, setRoom_Name] = useState('')
-
+    const navigate = useNavigate()
     function handleAdd_Room(e) {
         if (room_Name == '' || room_Id == '') {
             alert('กรุณากรอกข้อมูลให้ครบ')
@@ -18,13 +20,14 @@ function Add_meeting_room({ obtaine_msg }) {
         } else if (room_Name != '' && room_Id != '') {
             try {
                 e.preventDefault()
-                axios.post('http://localhost:7000/insert_meeting_room', {
+                axios.post('/insert_meeting_room', {
                     room_id: room_Id,
                     room_name: room_Name
                 }).then((res) => {
 
                     if (res.data.status == true) {
                         alert('เพิ่มข้อมูลห้องประชุมเรียบร้อย')
+                        location.reload()
                     } else {
                         alert('เกิดข้อผิดพลาด')
                         return false
@@ -256,9 +259,16 @@ function Add_meeting_room({ obtaine_msg }) {
                                         </div>
                                     </div> */}
                                     <div className="form-group row">
-                                        <div className="col-lg-8 ml-auto">
+                                        <div className="col-lg-6 ml-auto d-flex justify-content-end">
                                             <button type="submit" className="btn btn-primary" onClick={(e) => handleAdd_Room(e)}>
                                                 ยืนยัน
+                                            </button>
+
+                                            
+                                        </div>
+                                        <div className="col-lg-6 ml-auto">
+                                            <button type="submit" className="btn btn-warning" onClick={() => navigate('/all_meeting_room')}>
+                                                กลับ
                                             </button>
                                         </div>
                                     </div>

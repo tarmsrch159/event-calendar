@@ -1,0 +1,77 @@
+import React from 'react'
+import axios from '../api/axios'
+import { useAuth } from '../context/AuthContext';
+import { useState, useEffect } from "react";
+function Login_admin() {
+    const [credentials, setCredentials] = useState({ username: '', password: '' });
+    const { login: authLogin } = useAuth();
+
+    const handleLogin = async (e) => {
+        e.preventDefault()
+        try {
+            const response = await axios.post('/login_admin', credentials);
+            const { token } = response.data;
+            authLogin(token);
+        } catch (error) {
+            console.error('Login failed', error);
+        }
+    };
+
+    useEffect(() => {
+        // document.body.classList.add()
+        // console.log('Container Height:', document.querySelector('.login-form-bg').offsetHeight);
+    }, [])
+
+
+    return (
+        <div className="login-form-bg h-100 ">
+            <div className="h-100">
+                <div className="row justify-content-center h-100">
+                    <div className="col-xl-6 mx-auto">
+                        <div className="form-input-content">
+                            <div className="card login-form mb-0">
+                                <div className="card-body pt-5">
+                                    <a className="text-center" href="index.html">
+                                        {" "}
+                                        <h4>เข้าสู่ระบบ</h4>
+                                    </a>
+                                    <form className="mt-5 mb-5 login-input text-center">
+                                        <div className="form-group">
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Username"
+                                                onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
+                                            />
+                                        </div>
+                                        <div className="form-group">
+                                            <input
+                                                type="password"
+                                                className="form-control"
+                                                placeholder="Password"
+                                                onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+                                            />
+                                        </div>
+                                        <button className="btn login-form__btn submit w-100" onClick={(e) => handleLogin(e)}>
+                                            เข้าสู่ระบบ
+                                        </button>
+                                    </form>
+                                    {/* <p className="mt-5 login-form__footer">
+                                        Dont have account?{" "}
+                                        <a href="page-register.html" className="text-primary">
+                                            Sign Up
+                                        </a>{" "}
+                                        now
+                                    </p> */}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    )
+}
+
+export default Login_admin

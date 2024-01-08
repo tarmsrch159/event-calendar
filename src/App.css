@@ -164,11 +164,11 @@ h1 {
     background-color: #e6e6e6; 
 } 
   
-.react-calendar__tile--now { 
+.react-calendar__tile--now {    
     background: #ffff76; 
 } 
   
-.react-calendar__tile--now:enabled:hover, 
+.react-calendar__tile--now:enabled:hover,   
 .react-calendar__tile--now:enabled:focus { 
     background: #ffffa9; 
 } 
@@ -306,6 +306,6 @@ h1 {
 } 
   
 .event-marked { 
-    background-color: #ff4081; 
+    background-color: blue; 
     color: white; 
 }

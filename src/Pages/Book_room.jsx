@@ -4,8 +4,24 @@ import Header_start from '../Components/Header_start'
 import Sidebar from '../Components/Sidebar'
 import Calendar_1 from "react-calendar";
 import { useState, useEffect } from "react";
-import '../assets/calendar.css'
-import axios from 'axios'
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+
+// dayjs.extend(utc);
+// dayjs.extend(timezone);
+// dayjs.extend(LocalizedFormat)
+// import axios from 'axios'
+import axios from '../api/axios'
+
+import { Calendar } from 'primereact/calendar';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+
+
 
 
 //Date-fns
@@ -14,6 +30,7 @@ import getMonth from 'date-fns/getMonth'
 import getYear from 'date-fns/getYear'
 
 function Book_room({ obtaine_msg }) {
+
     const [selectedDate, setSelectedDate] = useState(null);
     const [eventName, setEventName] = useState("");
     const [meeting_Room, setMeeting_Room] = useState("")
@@ -26,7 +43,8 @@ function Book_room({ obtaine_msg }) {
     })
     const [name, setName] = useState('')
     const [lastname, setLastname] = useState('')
-
+    const [tel, setTel] = useState('')
+    const [department, setDepartment] = useState('')
     const j_month = [
         {
             id: '1',
@@ -79,6 +97,17 @@ function Book_room({ obtaine_msg }) {
     ]
     const [m_th, setM_th] = useState('')
     const [dp_meeting_Room, setDp_meeting_Room] = useState([])
+    const d = new Date()
+
+    const [startTime, setStartTime] = useState(dayjs())
+    const [endTime, setEndTime] = useState(dayjs())
+
+    const [dbStartTime, setDbStartTime] = useState('')
+    const [dbEndTime, setDbEndTime] = useState('')
+
+    //dateTime
+    const [date, setDate] = useState(null)
+
 
     const Date_Click_Fun = (date) => {
         setSelectedDate(date);
@@ -104,23 +133,28 @@ function Book_room({ obtaine_msg }) {
     };
 
     const Create_Event_Fun = async () => {
-        if (selectedDate && eventName) {
+        
+        if (eventName) {
             const newEvent = {
                 id_meeting: new Date().getTime(),
-                date: selectedDate,
+                date: startTime.$d,
                 title: eventName,
                 meeting_Room: meeting_Room,
                 name: name,
-                lastname: lastname
+                lastname: lastname,
+                tel: tel,
+                department: department,
+                dbStartTime: startTime.$d,
+                dbEndTime: endTime.$d
             };
             setEvents([...events, newEvent]);
             setSelectedDate(null);
             setEventName("");
             setSelectedDate(newEvent.date);
-
+            console.log(events)
             try {
 
-                const response = await axios.post('http://localhost:7000/book_room', newEvent)
+                const response = await axios.post('/book_room', newEvent)
                 console.log(response.data)
                 if (response.data.message == 'Room Booked') {
                     alert('ห้องประชุมถูกจองเรียบร้อย')
@@ -155,11 +189,11 @@ function Book_room({ obtaine_msg }) {
     };
 
     useEffect(() => {
-        axios.get('http://localhost:7000/all_meeting_room').then((res) => {
+        axios.get('/all_meeting_room').then((res) => {
             setDp_meeting_Room(res.data)
         })
 
-        axios.get('http://localhost:7000/mark_event').then((res) => {
+        axios.get('/mark_event').then((res) => {
             setMark_Event(res.data)
         })
     }, [])
@@ -176,6 +210,23 @@ function Book_room({ obtaine_msg }) {
         }
     })
 
+    const [value, setValue] = useState(dayjs())
+
+    useEffect(() => {
+        // Access hour, minute, and second components
+        const S_hour = startTime.hour();
+        const S_minute = startTime.minute();
+        const S_second = startTime.second();
+
+        const E_hour = endTime.hour();
+        const E_minute = endTime.minute();
+        const E_second = endTime.second();
+
+        setDbStartTime(`${S_hour}:${S_minute}:${S_second}`);
+        setDbEndTime(`${E_hour}:${E_minute}:${E_second}`);
+    }, [startTime, endTime]);
+
+    console.log(startTime)
     return (
         <>
             < Header_start />
@@ -184,7 +235,7 @@ function Book_room({ obtaine_msg }) {
             <div className="content-body">
                 {/* <h1> GeeksforGeeks Calendar Application </h1> */}
                 <div className="container">
-                    <div className="calendar-container">
+                    {/* <div className="calendar-container">
                         <Calendar_1
                             value={selectedDate}
                             onClickDay={Date_Click_Fun}
@@ -200,8 +251,9 @@ function Book_room({ obtaine_msg }) {
                                         ? "event-marked"
                                         : ""
                             }
+                            minDate={new Date()}
                         />{" "}
-                    </div>
+                    </div> */}
                     <div className="event-container">
                         {" "}
                         <div className="card">
@@ -209,77 +261,122 @@ function Book_room({ obtaine_msg }) {
                                 <h2> จองห้องประชุม </h2>{" "}
                                 <h4>(คลิกเลือกวันที่ เพื่อจองห้องประชุม)</h4>
 
-
-                                {selectedDate && (
-                                    <div className="event-form">
-                                        <p style={{ color: 'black' }}>
-                                            {" "}
-                                            วันที่: {day_m_y.day} {m_th} {day_m_y.year}{" "}
-                                        </p>{" "}
-                                        <div className="row">
-                                            <div className="col-6">
-                                                <input
-                                                    type="text"
-                                                    className="form-control input-default"
-                                                    placeholder="วาระการประชุม"
-                                                    value={eventName}
-                                                    onChange={Event_Data_Update}
-                                                />
-                                            </div>
-
-                                            <div className="col-6">
-                                                <select className="form-control" onChange={(e) => setMeeting_Room(e.target.value)} aria-label="Default select example">
-                                                    <option select="">ห้องที่ประชุม</option>
-                                                    {dp_meeting_Room.map((items, index) => {
-                                                        return (
-                                                            <option value={items.room_name} key={index}>{items.room_name}</option>
-                                                        )
-                                                    })}
-                                                </select>
-                                            </div>
-
-                                        </div>
-                                        <hr />
-                                        <div className="row">
-                                            <div className="col-6">
-                                                <h5>ลงชื่อบุคคลจองห้องประชุม</h5>
-                                                <input
-                                                    type="text"
-                                                    className="form-control input-default"
-                                                    placeholder="ชื่อ"
-                                                    onChange={(e) => setName(e.target.value)}
-                                                />
-
-                                            </div>
-
-                                            <div className="col-6">
-                                                <h5>...</h5>
-                                                <input
-                                                    type="text"
-                                                    className="form-control input-default"
-                                                    placeholder="นามสกุล"
-                                                    onChange={(e) => setLastname(e.target.value)}
-                                                />
-
-                                            </div>
+                                <div className="event-form">
+                                    <p style={{ color: 'black' }}>
+                                        {" "}
+                                        วันที่: {day_m_y.day} {m_th} {day_m_y.year}{" "}
+                                    </p>{" "}
+                                    <div className="row">
+                                        <div className="col-6">
+                                            <input
+                                                type="text"
+                                                className="form-control input-default"
+                                                placeholder="หัวข้อการประชุม"
+                                                value={eventName}
+                                                onChange={Event_Data_Update}
+                                            />
                                         </div>
 
+                                        <div className="col-6">
+                                            <select className="form-control" onChange={(e) => setMeeting_Room(e.target.value)} aria-label="Default select example">
+                                                <option select="">ห้องที่ประชุม</option>
+                                                {dp_meeting_Room.map((items, index) => {
+                                                    return (
+                                                        <option value={items.room_name} key={index}>{items.room_name}</option>
+                                                    )
+                                                })}
+                                            </select>
+                                        </div>
 
-                                        {/* <button
+                                    </div>
+                                    <div className="row mt-3">
+                                        <div className="col-6">
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                <DateTimePicker
+                                                    ampm={false}
+                                                    label="เลือกเวลาสำหรับเริ่มการประชุม"
+                                                    value={value}
+                                                    onChange={(newValue) => setStartTime(newValue)}
+                                                    // onChange={(value) => alert('New date is: ', value)}
+                                                    // format='d/MM/y h:mm:ss a'
+                                                />
+                                            </LocalizationProvider>
+
+                                        </div>
+
+                                        <div className="col-6">
+                                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                <DateTimePicker
+                                                    ampm={false}
+                                                    label="เลือกเวลาสำหรับจบการประชุม"
+                                                    value={endTime}
+                                                    onChange={(newValue) => setEndTime(newValue)}
+                                                />
+                                            </LocalizationProvider>
+                                        </div>
+
+                                    </div>
+                                    <hr />
+                                    <div className="row">
+                                        <div className="col-6">
+                                            <h5>ลงชื่อบุคคลจองห้องประชุม</h5>
+                                            <input
+                                                type="text"
+                                                className="form-control input-default"
+                                                placeholder="ชื่อ"
+                                                onChange={(e) => setName(e.target.value)}
+                                            />
+
+                                        </div>
+
+                                        <div className="col-6">
+                                            <h5>...</h5>
+                                            <input
+                                                type="text"
+                                                className="form-control input-default"
+                                                placeholder="นามสกุล"
+                                                onChange={(e) => setLastname(e.target.value)}
+                                            />
+
+                                        </div>
+                                    </div>
+                                    <div className="row mt-3">
+                                        <div className="col-6">
+                                            <input
+                                                type="text"
+                                                className="form-control input-default"
+                                                placeholder="เบอร์โทร (สำหรับติดต่อ)"
+                                                onChange={(e) => setTel(e.target.value)}
+                                            />
+                                        </div>
+
+                                        <div className="col-6">
+                                            <input
+                                                type="text"
+                                                className="form-control input-default"
+                                                placeholder="หน่วยงาน"
+                                                onChange={(e) => setDepartment(e.target.value)}
+                                            />
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* <button
                                             className="btn btn-primary"
                                             onClick={Create_Event_Fun}
                                         >
                                             จองห้องประชุม{" "}
                                         </button>{" "} */}
 
-                                        <button type="button" onClick={Create_Event_Fun} className="btn mt-2 btn-success">
-                                            จองห้องประชุม{" "}
-                                            <span className="btn-icon-right">
-                                                <i className="fa fa-check" />
-                                            </span>
-                                        </button>
-                                    </div>
-                                )}
+                                    <button type="button" onClick={Create_Event_Fun} className="btn mt-2 btn-success">
+                                        จองห้องประชุม{" "}
+                                        <span className="btn-icon-right">
+                                            <i className="fa fa-check" />
+                                        </span>
+                                    </button>
+                                </div>
+
                             </div>
 
                         </div>

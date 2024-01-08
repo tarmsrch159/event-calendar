@@ -1,0 +1,184 @@
+<div className="card">
+                        <div className="card-body" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <h3 className='mb-4'>ดูรายการจองห้องประชุม (ตรวจสอบโดยการคลิก วันที่)</h3>
+                            <div className="calendar-container">
+                                <Calendar_1
+                                    value={selectedDate}
+                                    onClickDay={Date_Click_Fun}
+                                    tileClassName={({ date }) =>
+                                        selectedDate &&
+                                            date.toDateString() === selectedDate.toDateString()
+                                            ? "selected"
+                                            : map_event.some(
+                                                (event) =>
+                                                    event.dbStartTime.toDateString() ===
+                                                    date.toDateString(),
+                                            )
+                                                ? "event-marked"
+                                                : ""
+                                    }
+
+                                />{" "}
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div className="row mt-3 d-flex justify-content-center">
+                        {" "}
+                        {selectedDate && (
+                            <>
+                                {map_event.map((items) => {
+                                    return <>
+                                        {selectedDate.toDateString() == items.dbStartTime.toDateString()
+
+                                            ?
+                                            < div className="card">
+
+                                                <div className="card-body">
+
+                                                    <div className="event-container">
+                                                        <div className="event-form">
+                                                            <h2 style={{ color: 'black' }}> รายการจองห้องประชุม </h2>{" "}
+                                                            <p style={{ color: 'black' }}>
+                                                                {" "}
+                                                                วันที่: {day_m_y.day} {m_th} {day_m_y.year}{" "}
+                                                            </p>{" "}
+
+
+                                                            <>
+                                                                {show_Modal
+                                                                    ? <>
+                                                                        <h4>ห้องประชุม: <span>{items.room_name}</span></h4>
+                                                                        <h4>หัวข้อการประชุม: <span>{items.event}</span></h4>
+                                                                        <hr />
+                                                                        <h4>ชื่อ-นามสกุล (ผู้จองห้องประชุม) : <span>{items.name} {items.lastname}</span></h4>
+                                                                        <hr />
+                                                                        <div style={{ display: 'flex' }}>
+                                                                            <h5 style={{ marginRight: '30px' }}>กรุณากรอก หัวข้อการประชุม:</h5>
+                                                                            <input className='form-control input-default' type="text" onChange={(e) => setEvent_Change(e.target.value)} />
+                                                                        </div>
+                                                                        <div style={{ display: 'flex', marginTop: '25px' }}>
+                                                                            <h5 style={{ marginRight: '75px' }}>เลือกห้องประชุม:</h5>
+                                                                            <select onChange={(e) => setEvent_Room(e.target.value)} className="form-control" aria-label="Default select example">
+                                                                                <option select="">ห้องที่ประชุม</option>
+                                                                                {room.map((res) => {
+                                                                                    return <option value={res.room_name}>{res.room_name}</option>
+                                                                                })}
+                                                                            </select>
+                                                                        </div>
+
+                                                                        <p className="event-title">
+                                                                            {" "}
+                                                                            {items.title}{" "}
+                                                                        </p>{" "}
+
+                                                                        <button className='btn btn-primary' onClick={() => Update_Event_Fun(items.id, event_Change, event_Room)} >ยืนยัน</button>
+                                                                        <button className='btn btn-warning ml-2' onClick={handleModal}>ยกเลิก</button>
+                                                                    </>
+                                                                    : <>
+                                                                        <h4>ห้องประชุม: <span>{items.room_name}</span></h4>
+                                                                        <h4>หัวข้อการประชุม: <span>{items.event}</span></h4>
+                                                                        <h4>เริ่มการประชุม: <span>{items.dbStartTime.toLocaleDateString()}</span> : {items.dbStartTime.toLocaleTimeString()}</h4>
+                                                                        <h4>สิ้นสุดการประชุม: <span>{items.dbEndTime.toLocaleDateString()}</span> : {items.dbEndTime.toLocaleTimeString()}</h4>
+                                                                        <hr />
+                                                                        <h4>ชื่อ-นามสกุล (ผู้จองห้องประชุม) : <span>{items.name} {items.lastname}</span></h4>
+                                                                        <h4>เบอร์โทร (สำหรับติดต่อ) : <span>{items.tel}</span></h4>
+                                                                        <h4>หน่วยงาน : <span>{items.department}</span></h4>
+
+                                                                        {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                                                        < TimePicker ampm={false} label="Controlled picker" value={timeValue} onChange={(e) => setTimeValue(e)}/>
+                                                                    </LocalizationProvider> */}
+                                                                    </>
+                                                                }
+
+                                                                {show_Modal
+                                                                    ? null
+                                                                    : <>
+                                                                        <div className='mt-5'>
+                                                                            <button className='btn btn-success mr-3 ' onClick={handleModal}>แก้ไขการประชุม</button>
+
+                                                                            <button className='btn btn-danger ' onClick={() => Delete_Event_Fun(items.id)}>ลบการประชุม</button>
+                                                                        </div>
+                                                                    </>}
+
+                                                            </>
+                                                        </div>
+
+                                                    </div>
+
+
+                                                </div>
+                                            </div >
+                                            : null}
+                                    </>
+                                })}
+                            </>
+
+                        )}
+
+
+                        {events.length > 0 && selectedDate && (
+                            <div className="event-list">
+                                <h2> รายการจองห้องประชุม </h2>{" "}
+                                <div className="event-cards">
+                                    {" "}
+                                    {events.map((event) =>
+                                        event.date.toDateString() ===
+                                            selectedDate.toDateString() ? (
+                                            <div
+                                                key={event.id}
+                                                className="event-card"
+                                            >
+                                                {/* <div className="event-card-header">
+                                                    <span className="event-date">
+                                                        {" "}
+                                                        {event.date.toDateString()}{" "}
+                                                    </span>{" "}
+                                                    <div className="event-actions">
+                                                        <button
+                                                            className="update-btn"
+                                                            onClick={() =>
+                                                                Update_Event_Fun(
+                                                                    event.id,
+                                                                    prompt(
+                                                                        "ENTER NEW TITLE",
+                                                                    ),
+                                                                )
+                                                            }
+                                                        >
+                                                            Update Event{" "}
+                                                        </button>{" "}
+                                                        <button
+                                                            className="delete-btn"
+                                                            onClick={() =>
+                                                                Delete_Event_Fun(
+                                                                    event.id,
+                                                                )
+                                                            }
+                                                        >
+                                                            Delete Event{" "}
+                                                        </button>{" "}
+                                                    </div>{" "}
+                                                </div>{" "} */}
+                                                <div className="event-card-body">
+                                                    <h4>ห้องประชุม: <span>xxx</span></h4>
+                                                    <h4>วันที่ขอใช้: <span>xxx</span></h4>
+                                                    <h4>ห้องประชุม: <span>xxx</span></h4>
+                                                    <p className="event-title">
+                                                        {" "}
+                                                        {event.title}{" "}
+                                                    </p>{" "}
+                                                </div>{" "}
+                                            </div>
+                                        ) : null,
+                                    )}{" "}
+                                </div>{" "}
+                            </div>
+                        )}{" "}
+                        {/* <div className="col-xs-4">
+                        </div>
+
+                        <div className="col-xs-8">
+                        </div> */}
+                    </div>

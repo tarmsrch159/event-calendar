@@ -1,0 +1,239 @@
+import React from 'react'
+import { Calendar, dateFnsLocalizer } from 'react-big-calendar'
+import format from 'date-fns/format'
+import parse from 'date-fns/parse'
+import startOfWeek from 'date-fns/startOfWeek'
+import getDay from 'date-fns/getDay'
+import enUS from 'date-fns/locale/en-US'
+import { useEffect, useState, useRef } from 'react';
+import axios from 'axios'
+import 'react-big-calendar/lib/css/react-big-calendar.css'
+import ReactModal from 'react-modal';
+// import { useHistory } from "react-router-dom";
+
+ReactModal.setAppElement('#root');
+
+const locales = {
+    'en-US': enUS,
+}
+
+const localizer = dateFnsLocalizer({
+    format,
+    parse,
+    startOfWeek,
+    getDay,
+    locales,
+})
+function Test_calendar_2() {
+    const EVENTS = [
+        {
+            event_id: 1,
+            title: "Event 1",
+            start: new Date("2021 5 2 09:30"),
+            end: new Date("2021 5 2 10:30")
+        },
+        {
+            event_id: 2,
+            title: "Event 2",
+            start: new Date("2021 5 4 10:00"),
+            end: new Date("2021 5 4 11:00")
+        },
+        {
+            event_id: 3,
+            title: "Event 3",
+            start: new Date("2021 4 27 09:00"),
+            end: new Date("2021 4 28 10:00")
+        },
+        {
+            event_id: 4,
+            title: "Event 4",
+            start: new Date("2021 5 4 9:00"),
+            end: new Date("2021 5 4 10:36")
+        },
+        {
+            event_id: 5,
+            title: "Event 5",
+            start: new Date("2021 5 1 10:00"),
+            end: new Date("2021 5 18 11:00")
+        },
+        {
+            event_id: 6,
+            title: "Event 6",
+            start: new Date("2021 5 2 11:00"),
+            end: new Date("2021 5 2 12:00")
+        },
+        {
+            event_id: 7,
+            title: "Event 7",
+            start: new Date("2021 5 1 12:00"),
+            end: new Date("2021 5 1 13:00")
+        },
+        {
+            event_id: 8,
+            title: "Event 8",
+            start: new Date("2021 5 1 13:00"),
+            end: new Date("2021 5 1 14:00")
+        },
+        {
+            event_id: 9,
+            title: "Event 11",
+            start: new Date("2021 5 5 16:00"),
+            end: new Date("2021 5 5 17:00")
+        },
+        {
+            event_id: 10,
+            title: "Event 9",
+            start: new Date("2021 5 6  15:00"),
+            end: new Date("2021 5 6 16:00")
+        },
+        {
+            event_id: 11,
+            title: "Event 10",
+            start: new Date("2021 5 6 14:00"),
+            end: new Date("2021 5 6 15:00")
+        }
+    ];
+
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [view, setView] = useState('month');
+    // const history = useHistory();
+
+    const handleNavigate = (date, view, action) => {
+        // console.log('Navigated to:', date);
+        // console.log('Current view:', view);
+
+        if (view === 'month' && action === 'click') {
+            // Assuming "/day" is the route for the day view
+            // history.push(`/day/${format(date, 'yyyy-MM-dd')}`);
+        }
+
+        // Add more conditions or logic based on your requirements
+    };
+
+
+
+
+
+    const EventModal = ({ event, isOpen, onClose }) => {
+            const startTime = new Date(event.start)
+            const formatStartTime = startTime.toLocaleDateString()
+
+            const endTime = new Date(event.end)
+            const formatEndTime = endTime.toLocaleDateString()
+        return (
+            <ReactModal isOpen={isOpen} onRequestClose={onClose}>
+                <h2>{event.event_id}</h2>
+                <p>{event.title}</p>
+                <p>{formatStartTime} <span>{startTime.toLocaleTimeString()}</span></p>
+                <p>{formatEndTime} <span>{endTime.toLocaleTimeString()}</span></p>
+                {/* Add more event details as needed */}
+                <button onClick={onClose}>Close</button>
+            </ReactModal>
+        );
+    };
+
+    const handleEventClick = (event) => {
+        setSelectedEvent(event);
+        setIsModalOpen(true);
+        // const isOverlapping = events.some((e) => {
+        //     return (
+        //         (event.start >= e.start && event.start < e.end) ||
+        //         (event.end > e.start && event.end <= e.end) ||
+        //         (event.start <= e.start && event.end >= e.end)
+        //     );
+        // });
+
+        // if (!isOverlapping) {
+        //     setSelectedEvent(event);
+        //     setIsModalOpen(true);
+        // } else {
+        //     console.log('Overlapping events detected!');
+        //     // Handle overlapping events (e.g., show a warning)
+        // }
+    };
+
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+    };
+
+
+
+    const [events, setEvents] = useState([]);
+    useEffect(() => {
+
+        const fetchData = async () => {
+            try {
+                const response = await fetch('http://localhost:7000/mark_event');
+                const result = await response.json();
+
+                setEvents(result.map((res) => {
+                    const start = new Date(res.startTime);
+                    const end = new Date(res.endTime);
+
+                    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                        console.error('Invalid date');
+                    } else {
+                        // console.log('valid date', start)
+                    }
+
+                    return {
+                        event_id: res.id,
+                        title: res.event,
+                        start: start,
+                        end: end,
+                    };
+                }));
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    // console.log(events)
+
+    const handleSelectSlot = (slotInfo) => {
+        // slotInfo.start and slotInfo.end provide the selected time slot
+        // console.log('Selected Slot:', slotInfo);
+
+        if (view === 'month') {
+            setView('day');
+        } else if (view === 'day') {
+            setView('month');
+        } else {
+            setView('week')
+        }
+        // Add your custom logic here, e.g., open a modal, create an event, etc.
+    };
+
+    // console.log(events)
+
+    return (
+        <div>
+
+            < Calendar
+                localizer={localizer}
+                events={events}
+                startAccessor="start"
+                endAccessor="end"
+                style={{ height: 500 }}
+                onSelectEvent={handleEventClick}
+                selectable
+                onView={(view) => console.log('Current view:', view)}
+                onNavigate={handleNavigate}
+                onSelectSlot={handleSelectSlot}
+            />
+            <EventModal
+                event={selectedEvent}
+                isOpen={isModalOpen}
+                onClose={handleModalClose}
+            />
+
+        </div>
+    )
+}
+
+export default Test_calendar_2

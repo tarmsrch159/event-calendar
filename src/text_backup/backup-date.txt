@@ -1,0 +1,46 @@
+try {
+        const response = await fetch('http://localhost:7000/mark_event');
+        const result = await response.json();
+
+
+        setEvents(result.map((res) => {
+          try {
+            const start = new Date(res.startTime);
+            const end = new Date(res.endTime);
+            // const options = {
+            //   year: 'numeric',
+            //   month: 'long',
+            //   day: 'numeric',
+            //   hour: '2-digit',
+            //   minute: '2-digit',
+            //   second: '2-digit',
+            //   hour12: false, // Use 24-hour format
+            //   timeZoneName: 'short', // Display time zone abbreviation
+            // };
+            // const dateOriginal = res.startTime.toLocaleString('en-US', options)
+            // const dateEndOriginal = res.endTime.toLocaleString('en-US', options)
+            // const originalDate = new Date(dateOriginal);
+            // const originalDateEnd = new Date(dateEndOriginal);
+
+
+            // const formattedDateTime = originalDate.toLocaleString('en-US', options);
+            // const formattedDateTimeEnd = originalDateEnd.toLocaleString('en-US', options);
+            return {
+              event_id: res.id,
+              title: res.event,
+              start: start,
+              end: end
+            }
+          } catch (error) {
+            console.error('Error parsing date:', error);
+            console.log('Problematic date strings:', res.startTime, res.endTime);
+            return null;
+          }
+
+        }))
+
+
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
