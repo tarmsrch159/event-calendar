@@ -1,9 +1,16 @@
 import React, { useState } from 'react'
 import logo_1 from '../../assets/images/avatar/1.jpg'
-
+import AuthService from '../context/Auth_2'
 function Header({obtaine_msg}) {
 
     const [style_toggle, setStyle_toggle] = useState('show')
+    const adminUsername = localStorage.getItem('adminUsername')
+    
+    // const handleLogout = () => {
+    //     AuthService.logout()
+    //     location.reload()
+
+    // }
 
     const change_style = () => {
         if(style_toggle == 'show'){
@@ -14,7 +21,7 @@ function Header({obtaine_msg}) {
         obtaine_msg(style_toggle)
     }
 
-
+    
 
     return (
             <div className="header">
@@ -250,26 +257,13 @@ function Header({obtaine_msg}) {
                                         <ul>
                                             <li>
                                                 <a href="app-profile.html">
-                                                    <i className="icon-user" /> <span>Profile</span>
+                                                    <i className="icon-user" /> <span>ชื่อ {adminUsername}</span>
                                                 </a>
                                             </li>
+                                            
                                             <li>
                                                 <a href="#">
-                                                    <i className="icon-envelope-open" /> <span>Inbox</span>{" "}
-                                                    <div className="badge gradient-3 badge-pill gradient-1">
-                                                        3
-                                                    </div>
-                                                </a>
-                                            </li>
-                                            <hr className="my-2" />
-                                            <li>
-                                                <a href="page-lock.html">
-                                                    <i className="icon-lock" /> <span>Lock Screen</span>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="page-login.html">
-                                                    <i className="icon-key" /> <span>Logout</span>
+                                                    <i className="icon-key" /> <span>ออกจากระบบ</span>
                                                 </a>
                                             </li>
                                         </ul>

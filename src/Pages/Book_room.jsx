@@ -226,7 +226,7 @@ function Book_room({ obtaine_msg }) {
         setDbEndTime(`${E_hour}:${E_minute}:${E_second}`);
     }, [startTime, endTime]);
 
-    console.log(startTime)
+    
     return (
         <>
             < Header_start />

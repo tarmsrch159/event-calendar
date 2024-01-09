@@ -3,15 +3,25 @@ import axios from '../api/axios'
 // import { useAuth } from '../context/AuthContext';
 import AuthService from '../context/Auth_2';
 import { useState, useEffect } from "react";
-import { useAlert } from 'react-alert';
 import { ToastContainer, toast, Zoom } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 function Login_admin() {
     // const [credentials, setCredentials] = useState({ username: '', password: '' });
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const alertReact = useAlert()
     // const { login: authLogin } = useAuth();
+
+    const optionsToast = {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Zoom
+    }
 
     const handleLogin = async (e) => {
         e.preventDefault()
@@ -19,17 +29,7 @@ function Login_admin() {
             await AuthService.login(username, password);
         } catch (error) {
             // alertReact.error('กรุณาเข้าสู่ระบบ');
-            toast.error('กรุณาเข้าสู่ระบบ', {
-                position: "top-center",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "dark",
-                transition: Zoom
-            });
+            toast.error('กรุณาเข้าสู่ระบบ', optionsToast);
             console.error('Login failed', error);
         }
     };

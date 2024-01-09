@@ -17,6 +17,7 @@ import Test_calendar_2 from './Pages/Test_calendar_2'
 import UsingMeetingRoom from './Pages/UsingMeetingRoom'
 import Login_admin from './Pages/Login_admin'
 import ProtectComponent from './Components/ProtectComponent'
+import DashboardRoom from './Pages/DashboardRoom'
 
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
@@ -47,6 +48,7 @@ function App() {
             <Route path='/' element={< Calendar obtaine_msg={obtaine_msg} />}></Route>
             <Route path='/using_meeting_room' element={< UsingMeetingRoom obtaine_msg={obtaine_msg} />}></Route>
             <Route path='/book_room' element={< Book_room obtaine_msg={obtaine_msg} />}></Route>
+            <Route path='/dashboard_room' element={< DashboardRoom obtaine_msg={obtaine_msg} />}></Route>
 
 
 

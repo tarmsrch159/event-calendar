@@ -4,7 +4,7 @@ import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import parse from 'date-fns/parse';
 // import startOfWeek from 'date-fns/startOfWeek';
 // import getDay from 'date-fns/getDay';
-import { format, startOfWeek, getDay } from 'date-fns';
+import { isWithinInterval, startOfDay, endOfDay, format, startOfWeek, getDay } from 'date-fns';
 import enUS from 'date-fns/locale/en-US';
 import thLocale from 'date-fns/locale/th';
 
@@ -15,11 +15,12 @@ import isValid from 'date-fns/isValid';
 // import axios from 'axios'
 import axios from '../api/axios'
 
+//Css React-big-calendar
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 
 //Alert
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast, Zoom } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
@@ -77,6 +78,8 @@ function TestCalendar2() {
     //Alert
     const notify = () => toast("Wow so easy!");
 
+
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -115,14 +118,7 @@ function TestCalendar2() {
         fetchData();
     }, []);
 
-    const handleSelecting = (range) => {
-        console.log(range)
-        setDraggedEvent({
-            start: range.start,
-            end: range.end,
-            title: 'Dragged Event',
-        });
-    };
+
 
     const handleNavigate = (date, view, action) => {
         if (view === 'month' && action === 'click') {
@@ -133,52 +129,47 @@ function TestCalendar2() {
     };
 
     const updateStartEnd = (event_id) => {
-
-        axios.put('/updateStartEnd', {
+        if (editStart == '' || editEnd == '') {
+            toast.error('กรุณาเลือกวันและเวลา')
+            return
+        }
+        const updateTime = {
             event_id: event_id,
             start: editStart,
             end: editEnd
-        }).then((res) => {
-            console.log(res)
+        }
+
+        //Put for updating data
+        axios.put('/updateStartEnd', updateTime).then((res) => {
+            location.reload()
         })
     }
 
-    const handleSelectSlot = (slotInfo, event_id,name, lastname, room_name, tel, department) => {
-        // { slotInfo ,event_id, start, end, action }
-        // setSelectedSlot({ start, end });
+    const handleSelectSlot = (slotInfo, event_id, name, lastname, room_name, tel, department) => {
+        // setSelectedSlot({ start: slotInfo.start, end: slotInfo.end });
         setEditStart(slotInfo.start)
         setEditEnd(slotInfo.end)
-        
-        // setDraggedEvent({
-        //     event_id: event_id,
-        //     name: name,
-        //     lastname: lastname,
-        //     room_name: room_name,
-        //     tel: tel,
-        //     department: department,
-        //     start: slotInfo.start,
-        //     end: slotInfo.end,
-        //     title: 'Dragged Event',
-        // });
-        // setEvents([...events, draggedEvent]);
-        // setDraggedEvent(null);
+        toast.info(`อัพเดตเวลา การจองห้องประชุม: ${slotInfo.start.toLocaleString()} - ${slotInfo.end.toLocaleString()}`, { autoClose: false })
 
-
-        // if (action === 'select' || action === 'click') {
-        //     // Check if start and end are valid dates
-        //     if (isValid(start) && isValid(end)) {
-        //         // Handle the selected time range
-        //         console.log('Selected Range:', start, end);
-        //     } else {
-        //         console.warn('Invalid date range:', start, end);
-        //     }
-        // } else if (action === 'click') {
-        //     // Handle a single click
-        //     console.log('Clicked on:', start);
-        // }
     };
 
+
     const handleEventClick = (event) => {
+        const optionsToastWarning = {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            draggable: true,
+            progress: undefined,
+            theme: "dark",
+            transition: Zoom,
+            onClose: () => {
+                setSelectedEvent(event);
+                setIsModalOpen(true);
+            }
+        }
+
         const overlappingEvents = events.filter(
             (e) =>
                 e.event_id !== event.event_id &&
@@ -191,12 +182,16 @@ function TestCalendar2() {
             setSelectedEvent(event);
             setIsModalOpen(true);
         } else {
+            toast.warning(
+                <div>
+                    <div>
+                        <span>หมายเหตุ: การประชุมได้มีการจองทับกัน กรุณาเลือกวันและเวลาในการประชุมใหม่</span>
+                    </div>
+                    <div className='mt-3'>
+                        <button className='btn btn-success px-4'>OK</button>
+                    </div>
+                </div>, optionsToastWarning);
 
-
-
-            alert('หมายเหตุ: การประชุมได้มีการจองทับกัน กรุณาเลือกวันและเวลาในการประชุมใหม่')
-            setSelectedEvent(event);
-            setIsModalOpen(true);
             // Handle overlapping events (e.g., show a warning)
         }
     };
@@ -209,8 +204,9 @@ function TestCalendar2() {
                     (event.end > e.start && event.end <= e.end) ||
                     (event.start <= e.start && event.end >= e.end))
         );
-        
+
         const isOverlapping = overlappingEvents.length > 0;
+
         return {
             style: {
                 backgroundColor: isOverlapping ? 'red' : 'blue',
@@ -222,7 +218,6 @@ function TestCalendar2() {
             },
         }
 
-
     };
 
     const handleModalClose = () => {
@@ -230,12 +225,7 @@ function TestCalendar2() {
     };
 
     const EventModal = ({ event, isOpen, onClose }) => {
-        // const startTime = new Date(event.start);
-        // const formatStartTime = startTime.toLocaleDateString();
 
-        // const endTime = new Date(event.end);
-        // const formatEndTime = endTime.toLocaleDateString();
-        // console.log(event)
         return (
             <ReactModal isOpen={isOpen} onRequestClose={onClose}
                 style={{
@@ -290,6 +280,8 @@ function TestCalendar2() {
                             onSelectSlot={(slotInfo) => handleSelectSlot(slotInfo, event.event_id, event.name, event.lastname, event.room_name, event.tel, event.department)}
                             eventPropGetter={eventStyleGetter}
                             defaultDate={event.start}
+                        // onSelecting={handleSelecting}
+
 
                         />
                     </>
@@ -309,6 +301,7 @@ function TestCalendar2() {
             </ReactModal>
         );
     };
+
 
     return (
         <div>
@@ -331,7 +324,19 @@ function TestCalendar2() {
                 isOpen={isModalOpen}
                 onClose={handleModalClose}
             />
-
+            <ToastContainer
+                position="top-center"
+                autoClose={5000}
+                newestOnTop={false}
+                hideProgressBar
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover={false}
+                theme="dark"
+                transition:Zoom
+            />
 
         </div>
     );
