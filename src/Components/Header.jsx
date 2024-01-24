@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import logo_1 from '../../assets/images/avatar/1.jpg'
+import logo_1 from '/assets/images/avatar/1.jpg'
 import AuthService from '../context/Auth_2'
 function Header({obtaine_msg}) {
 
